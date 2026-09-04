@@ -1,0 +1,69 @@
+---
+- name: Yerel DevOps Ortamini Hazirla
+  hosts: localhost
+  connection: local
+  become: true
+
+  tasks:
+    - name: Temel bagimliliklari kur
+      apt:
+        name:
+          - curl
+          - git
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - lsb-release
+        state: present
+        update_cache: yes
+
+    - name: Anahtarlik (keyrings) klasorunu olustur
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Docker GPG anahtarini indir
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Docker apt reposunu ekle (modern yontem)
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Docker paketlerini kur
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+
+    - name: Docker servisini baslat ve baslangica ekle
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Mevcut kullaniciyi docker grubuna ekle
+      user:
+        name: "{{ ansible_env.SUDO_USER | default(ansible_user_id) }}"
+        groups: docker
+        append: yes
+
+    - name: Kubectl kur (v1.28.0)
+      get_url:
+        url: "https://dl.k8s.io/release/v1.28.0/bin/linux/amd64/kubectl"
+        dest: /usr/local/bin/kubectl
+        mode: '0755'
+
+    - name: K3d kur (Docker uzerinde Kubernetes icin)
+      shell: curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+      args:
+        creates: /usr/local/bin/k3d
+
