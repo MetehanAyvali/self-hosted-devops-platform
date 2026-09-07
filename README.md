@@ -1,6 +1,6 @@
 # Self-Hosted DevOps Platform
 
-Bu proje, yerel bir Ubuntu ortamında uçtan uca modern DevOps pratiklerini simüle etmek amacıyla hazırlanmıştır.
+Bu proje, yerel bir Ubuntu ortamında uçtan uca modern DevOps pratiklerini simüle etmek amacıyla hazırlandı.
 
 ## Mimari ve Kullanılan Teknolojiler
 - **Altyapı (IaC):** Terraform ile K3d (Kubernetes) kümesinin ayağa kaldırılması.
